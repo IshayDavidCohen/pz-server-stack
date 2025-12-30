@@ -9,11 +9,13 @@ export interface WhitelistResponse {
   request_id: string
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
+
 export async function requestWhitelist(
   username: string,
   note: string
 ): Promise<WhitelistResponse> {
-  const response = await fetch('http://localhost:8000/whitelist/request', {
+  const response = await fetch(`${API_BASE}/whitelist/request`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
