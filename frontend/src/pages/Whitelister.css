@@ -1,0 +1,73 @@
+.whitelister-subtitle {
+  color: #a8a08a;
+  font-size: 16px;
+  font-weight: 400;
+  text-align: center;
+  margin: 0 0 30px 0;
+  line-height: 1.5;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.error-alert {
+  padding: 12px;
+  background-color: rgba(138, 74, 74, 0.2);
+  border: 2px solid #8a4a4a;
+  border-radius: 4px;
+  color: #ffaaaa;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.success-panel {
+  padding: 20px;
+  background-color: rgba(74, 93, 35, 0.2);
+  border: 2px solid #6b7d3a;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.success-title {
+  color: #c4b99f;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 10px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.success-message {
+  color: #a8a08a;
+  font-size: 16px;
+  margin: 0 0 10px 0;
+}
+
+.success-id {
+  color: #8a9d4a;
+  font-size: 14px;
+  font-family: monospace;
+  margin: 0;
+  word-break: break-all;
+}
+
+@media (max-width: 768px) {
+  .whitelister-subtitle {
+    font-size: 14px;
+  }
+
+  .success-panel {
+    padding: 15px;
+  }
+
+  .success-title {
+    font-size: 18px;
+  }
+}
+
