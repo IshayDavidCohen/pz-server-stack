@@ -1,0 +1,22 @@
+.video-background-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.video-background {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.3;
+  /* VHS-style video distortion */
+  filter: contrast(1.1) brightness(0.95) saturate(1.2);
+  transform: scale(1.01);
+}
+
+/* VHS overlay removed - grain effect is now handled globally in App.css */
+
