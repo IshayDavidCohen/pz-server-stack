@@ -1,0 +1,102 @@
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+
+# Node / JS (monorepo-safe)
+node_modules/
+**/node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.yarn-cache/
+.yarn-unplugged/
+.yarn-integrity
+.pnp.*
+.eslintcache
+
+
+# Vite / Build outputs
+dist/
+**/dist/
+dist-ssr/
+**/dist-ssr/
+.vite/
+**/.vite/
+
+
+# Next.js leftovers (if any)
+.next/
+out/
+.vercel/
+
+
+# TypeScript / bundlers
+*.tsbuildinfo
+
+
+# Python (FastAPI)
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+
+# Python virtualenvs
+.venv/
+venv/
+env/
+**/.venv/
+**/venv/
+**/env/
+
+
+# Python tooling caches
+.pytest_cache/
+**/.pytest_cache/
+.mypy_cache/
+**/.mypy_cache/
+.ruff_cache/
+**/.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+
+# App runtime data (don’t commit user requests)
+data/
+**/data/
+*.sqlite
+*.sqlite3
+*.db
+
+
+# Docker (local overrides)
+docker-compose.override.yml
+
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.swp
+*.swo
