@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-    WORKER_BASE_URL: str = "http://whitelist-worker:8001"
+    WORKER_BASE_URL: str = "http://control-worker:8001"
 
     # CORS
     CORS_ORIGINS: str = "http://localhost:5173"

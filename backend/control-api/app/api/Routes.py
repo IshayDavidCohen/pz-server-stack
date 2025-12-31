@@ -7,6 +7,7 @@ from app.core.Config import settings
 from app.core.HTTP import is_lan_client, build_steam_join_url
 
 router = APIRouter()
+worker = WorkerClient(settings.WORKER_BASE_URL)
 
 @router.get("/health")
 def health():
@@ -17,7 +18,7 @@ def health():
 @router.post("/whitelist/request", response_model=CreateRequestResponse)
 async def create_request(payload: WhitelistRequestIn):
     try:
-        return await WorkerClient.post("/whitelist/request", json=payload.model_dump())
+        return await worker.post("/whitelist/request", json=payload.model_dump())
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
 
@@ -25,7 +26,7 @@ async def create_request(payload: WhitelistRequestIn):
 @router.get("/whitelist/requests")
 async def list_requests(status: str | None = None):
     try:
-        return await WorkerClient.get("/whitelist/requests", params={"status": status} if status else None)
+        return await worker.get("/whitelist/requests", params={"status": status} if status else None)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
 
@@ -33,7 +34,7 @@ async def list_requests(status: str | None = None):
 @router.post("/whitelist/requests/{request_id}/approve")
 async def approve(request_id: str):
     try:
-        return await WorkerClient.post(f"/whitelist/requests/{request_id}/approve", json={})
+        return await worker.post(f"/whitelist/requests/{request_id}/approve", json={})
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
 
@@ -41,7 +42,7 @@ async def approve(request_id: str):
 @router.post("/whitelist/requests/{request_id}/reject")
 async def reject(request_id: str):
     try:
-        return await WorkerClient.post(f"/whitelist/requests/{request_id}/reject", json={})
+        return await worker.post(f"/whitelist/requests/{request_id}/reject", json={})
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
 
@@ -49,7 +50,7 @@ async def reject(request_id: str):
 @router.get("/status", response_model=StatusResponse)
 async def status():
     try:
-        return await WorkerClient.get("/status")
+        return await worker.get("/status")
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
 
