@@ -1,18 +1,18 @@
 services:
-  whitelist-worker:
-    build: ../backend/whitelist-worker
-    container_name: whitelist-worker
+  control-worker:
+    build: ../../backend/control-worker
+    container_name: control-worker
     env_file: .env
     volumes:
       - ./worker-data:/data
     ports:
       - "8001:8001"
 
-  whitelist-api:
-    build: ../backend/whitelist-api
-    container_name: whitelist-api
+  control-api:
+    build: ../../backend/control-api
+    container_name: control-api
     env_file: .env
     depends_on:
-      - whitelist-worker
+      - control-worker
     ports:
       - "8000:8000"
