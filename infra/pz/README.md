@@ -22,8 +22,7 @@ This folder contains a lightweight Docker Compose config, environment template, 
 
 ---
 
-# Quickstart
-
+# Quickstart - Scripts:
 1. Copy the env template and edit:
 ```bash
 # bash
@@ -32,31 +31,42 @@ cp .env.example .env
 # edit `.env` and set required values (PASSWORD, ADMIN_PASSWORD, SERVER_NAME, etc.)
 ```
 
-2. Start the server (default: follow logs):
+Start the server (default: follow logs):
 ```bash
 # bash
 ./start.sh
 ```
 
-3. Stop (keeps containers):
+Stop the server (keeps containers):
 ```bash
 # bash
 ./stop.sh
 ```
 
-4. Remove containers + network:
+Remove containers + network:
 ```bash
 # bash
 ./down.sh
 ```
 
-5. View logs:
+View logs:
 ```bash
 # bash
 ./logs.sh
 ```
 
-## Important `.env` values
+## Notes on scripts
+- `start.sh` supports environment overrides:
+  - `PULL_FIRST=1` — pull image before start
+  - `FOLLOW_LOGS=0` — start without following logs
+  - `SERVICE_NAME` — override compose service name (default `pz_srv`)
+- `stop.sh` stops service but preserves containers and network.
+- `down.sh` removes containers and network but leaves bind-mounted data on disk.
+- `logs.sh` follows logs for the compose service.
+
+---
+
+# Important `.env` values
 Ensure you set at minimum:
 - `SERVER_BRANCH` — e.g. `unstable` (Build 42) or leave empty for stable.
 - `SERVER_NAME` — server save name / identifier.
@@ -73,6 +83,7 @@ ADMIN_USERNAME=admin
 ADMIN_PASSWORD=CHANGE_ME_ADMIN
 ```
 
+
 ## Ports
 - UDP `16261` — primary game port
 - UDP `16262` — secondary game port
@@ -80,10 +91,11 @@ ADMIN_PASSWORD=CHANGE_ME_ADMIN
 
 If you do not need RCON, remove the `27015:27015/tcp` mapping from `docker-compose.yml`.
 
-## RCON
+### RCON
 RCON is optional. If enabled, set `RCON_PASSWORD` and optionally restrict access via firewall to LAN only.
 
-## Mods & Maps
+---
+# Mods & Maps
 Two practical ways to add mods:
 - Edit the generated server `.ini` in `server-data/` after first run (recommended and reliable).
 - If your image supports it, set `MODS=` and `MAP=` in `.env` (behavior depends on image).
@@ -156,7 +168,7 @@ Keep `Muldraugh, KY` last unless the mod author says otherwise.
 
 ---
 
-## Backups
+# Backups
 Persistent data lives in:
 - `server-data/` (saves, config, logs)
 - `server-files/` (server install)
@@ -167,16 +179,9 @@ Quick backup:
 tar -czf pz-backup-$(date +%F).tgz server-data server-files
 ```
 
-## Notes on scripts
-- `start.sh` supports environment overrides:
-  - `PULL_FIRST=1` — pull image before start
-  - `FOLLOW_LOGS=0` — start without following logs
-  - `SERVICE_NAME` — override compose service name (default `pz_srv`)
-- `stop.sh` stops service but preserves containers and network.
-- `down.sh` removes containers and network but leaves bind-mounted data on disk.
-- `logs.sh` follows logs for the compose service.
+---
 
-## Firewall & Router
+# Firewall & Router
 - Allow UDP `16261` and `16262` through your host firewall (UFW example):
 ```bash
 # bash
@@ -206,7 +211,7 @@ sudo ufw status verbose
 
 ---
 
-## Troubleshooting
+# Troubleshooting
 - If configs are not applied, stop the container, inspect `server-data/` for generated `.ini` files, and edit the server-specific `.ini`.
 - If ports appear blocked, verify host firewall / router port forwarding.
 - Use `docker compose ps` and `docker compose logs` for runtime diagnostics.
@@ -233,6 +238,6 @@ sudo ss -lntp | egrep '27015'
 
 ---
 
-## Contact / Attribution
+# Contact / Attribution
 This infra is intended for small LAN / friends deployments. Adapt as needed for public hosting, security hardening, or larger scale deployments.
 
