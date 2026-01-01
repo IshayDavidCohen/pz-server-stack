@@ -1,48 +1,44 @@
 export interface WhitelistRequest {
   username: string
-  note: string
+  discord_id: string
 }
 
 export interface WhitelistResponse {
   ok: boolean
   message: string
-  request_id: string
+  request_id: string | null
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const API_BASE = import.meta.env.VITE_API_BASE_URL
 
-export async function requestWhitelist(
-  username: string,
-  note: string
-): Promise<WhitelistResponse> {
-  const response = await fetch(`${API_BASE}/whitelist/request`, {
+export async function requestWhitelist(username: string, discordId: string): Promise<WhitelistResponse> {
+  if (!API_BASE) {
+    throw new Error('VITE_API_BASE_URL is not set (check frontend .env and restart Vite)')
+  }
+
+  const payload: WhitelistRequest = {
+    username,
+    discord_id: discordId,
+  }
+
+  const res = await fetch(`${API_BASE}/whitelist/request`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      username,
-      note,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   })
 
-  if (!response.ok) {
-    let errorMessage = `Request failed with status ${response.status}`
+  // Better error extraction (FastAPI often returns JSON error)
+  if (!res.ok) {
+    let msg = `Request failed (${res.status})`
     try {
-      const errorData = await response.json()
-      errorMessage = errorData.message || errorData.detail || errorMessage
+      const data = await res.json()
+      msg = data?.detail ?? msg
     } catch {
-      // If response is not JSON, use default error message
+      const text = await res.text()
+      if (text) msg = text
     }
-    throw new Error(errorMessage)
+    throw new Error(msg)
   }
 
-  const data: WhitelistResponse = await response.json()
-
-  if (!data.ok) {
-    throw new Error(data.message || 'Request failed')
-  }
-
-  return data
+  return (await res.json()) as WhitelistResponse
 }
-
