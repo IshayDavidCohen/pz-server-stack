@@ -1,59 +1,72 @@
-from uuid import uuid4
-from datetime import datetime, timezone
-from typing import Optional, List, Dict
+import os
+import re
+import hmac
+import hashlib
+
+from typing import Dict
 
 # App dependencies
-from app.repositories.WhitelistRepository import JsonWhitelistRepository
+from app.core.Rcon import SourceRconClient
+from app.core.Config import settings
+
+_USERNAME_RE = re.compile(r"^[A-Za-z0-9_]{3,32}$")
+
+def _parse_allowlist(raw: str) -> set[str]:
+    return {x.strip() for x in (raw or "").split(",") if x.strip()}
+
 
 class WhitelistService:
-    def __init__(self, repository: JsonWhitelistRepository):
-        self._repository = repository
+    def __init__(self):
+        self._allowed_ids = _parse_allowlist(os.getenv("ALLOWED_DISCORD_IDS", ""))
 
-    def create_request(self, username: str, note: str) -> Dict:
-        username = username.strip()
-        if not username:
-            return {"ok": False, "message": "Username is required", "request_id": None}
+    def auto_whitelist(self, username: str, discord_id: str) -> Dict:
+        username = (username or "").strip()
+        discord_id = (discord_id or "").strip()
 
-        rows = self._repository.load()
+        if not _USERNAME_RE.match(username):
+            raise PermissionError("Invalid username format.")
+        if not re.fullmatch(r"\d{15,20}", discord_id):
+            raise PermissionError("Invalid Discord ID format.")
+        if discord_id not in self._allowed_ids:
+            raise PermissionError("Discord ID is not allowed to auto-whitelist.")
 
-        if any(r["username"].lower() == username.lower() for r in rows):
-            return {
-                "ok": False,
-                "message": f"Username '{username}' was already requested. Ping the admin if you need changes.",
-                "request_id": None
-            }
+        login_password = "5533"
 
-        request_id = str(uuid4())
-        rows.append(
-            {
-                "request_id": request_id,
-                "username": username,
-                "note": (note or "").strip(),
-                "status": "pending",
-                "created_at": datetime.now(timezone.utc).isoformat(),
-            }
+        c = SourceRconClient(
+            host=settings.PZ_RCON_HOST,
+            port=settings.PZ_RCON_PORT,
+            password=settings.PZ_RCON_PASSWORD,
+            timeout=3.0,
         )
-        self._repository.save(rows)
+        c.connect()
 
-        return {"ok": True, "message": "Request received, whitelisting in progress.", "request_id": request_id}
+        auth_res = c.auth()
+        if not auth_res.ok:
+            c.close()
+            raise RuntimeError("RCON auth failed (check PZ_RCON_PASSWORD).")
 
-    def list_requests(self, status: Optional[str] = None) -> List[Dict]:
-        rows = self._repository.load()
-        if status:
-            rows = [r for r in rows if r.get("status") == status]
+        # Some servers expect "adduser", some accept "/adduser". We try both.
+        cmd_variants = [
+            f'adduser "{username}" "{login_password}"',
+            f'/adduser "{username}" "{login_password}"',
+        ]
 
-        return sorted(rows, key=lambda r: r.get("created_at", ""), reverse=True)
-
-    def set_status(self, request_id: str, status: str) -> bool:
-        rows = self._repository.load()
-        changed = False
-        for r in rows:
-            if r.get("request_id") == request_id:
-                r["status"] = status
-                changed = True
+        last = None
+        ok = False
+        for cmd in cmd_variants:
+            last = c.exec(cmd)
+            if last.ok:
+                ok = True
                 break
 
-        if changed:
-            self._repository.save(rows)
+        c.close()
 
-        return changed
+        if not ok:
+            raise RuntimeError(f"RCON adduser failed: {getattr(last, 'data', None)}")
+
+        return {
+            "ok": True,
+            "message": f"Whitelisted. Use username '{username}' with the password shown to log in.",
+            "request_id": None,
+            "login_password": login_password,
+        }

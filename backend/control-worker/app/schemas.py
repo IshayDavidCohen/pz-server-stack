@@ -4,13 +4,12 @@ from typing import Optional, Literal, List
 
 class WhitelistRequestIn(BaseModel):
     username: str = Field(min_length=2, max_length=32)
-    note: Optional[str] = Field(default=None, max_length=200)
+    discord_id: str = Field(min_length=15, max_length=20, pattern=r"^\d{15,20}$")
 
 
 class WhitelistRequestRow(BaseModel):
     request_id: str
     username: str
-    note: str
     status: Literal["pending", "approved", "rejected"]
     created_at: str
 
@@ -18,7 +17,8 @@ class WhitelistRequestRow(BaseModel):
 class CreateRequestResponse(BaseModel):
     ok: bool
     message: str
-    request_id: Optional[str]
+    login_password: Optional[str] = None
+
 
 
 class StatusResponse(BaseModel):

@@ -16,7 +16,7 @@ from app.services.StatusService import StatusService
 router = APIRouter()
 
 repository = JsonWhitelistRepository(settings.DATA_DIR)
-whitelist_svc = WhitelistService(repository)
+whitelist_svc = WhitelistService()
 status_svc = StatusService()
 
 
@@ -25,28 +25,15 @@ def health():
     return {"status": "ok"}
 
 @router.post("/whitelist/request", response_model=CreateRequestResponse)
-def create_request(payload: WhitelistRequestIn):
-    res = whitelist_svc.create_request(payload.username, payload.note or "")
-    if res["ok"] is False and res["message"] == "Username is required":
-        raise HTTPException(status_code=400, detail=res["message"])
-    return res
-
-@router.get("/whitelist/requests", response_model=List[WhitelistRequestRow])
-def list_requests(status: Optional[str] = None):
-    return whitelist_svc.list_requests(status=status)
-
-
-@router.post("/whitelist/requests/{request_id}/approve")
-def approve(request_id: str):
-    if not whitelist_svc.set_status(request_id, "approved"):
-        raise HTTPException(status_code=404, detail="Request not found")
-    return {"ok": True}
-
-@router.post("/whitelist/requests/{request_id}/reject")
-def reject(request_id: str):
-    if not whitelist_svc.set_status(request_id, "rejected"):
-        raise HTTPException(status_code=404, detail="Request not found")
-    return {"ok": True}
+def whitelist(payload: WhitelistRequestIn):
+    try:
+        return whitelist_svc.auto_whitelist(payload.username, payload.discord_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Whitelist worker error: {e}")
 
 
 @router.get("/status", response_model=StatusResponse)
