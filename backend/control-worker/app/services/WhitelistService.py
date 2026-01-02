@@ -19,7 +19,7 @@ class WhitelistService:
     def __init__(self):
         self._allowed_ids = _parse_allowlist(os.getenv("ALLOWED_DISCORD_IDS", ""))
 
-    def auto_whitelist(self, username: str, discord_id: str) -> Dict:
+    def auto_whitelist(self, username: str, discord_id: str, password: str = None) -> Dict:
         username = (username or "").strip()
         discord_id = (discord_id or "").strip()
 
@@ -30,7 +30,7 @@ class WhitelistService:
         if discord_id not in self._allowed_ids:
             raise PermissionError("Discord ID is not allowed to auto-whitelist.")
 
-        login_password = "5533"
+        login_password= "5533" if not password else password
 
         c = SourceRconClient(
             host=settings.PZ_RCON_HOST,

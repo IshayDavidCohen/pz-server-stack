@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException
 
 from app.schemas import (
@@ -14,6 +15,7 @@ router = APIRouter()
 
 whitelist_svc = WhitelistService()
 status_svc = StatusService()
+logger = logging.getLogger("control-worker")
 
 
 @router.get("/health")
@@ -23,7 +25,7 @@ def health():
 @router.post("/whitelist/request", response_model=CreateRequestResponse)
 def whitelist(payload: WhitelistRequestIn):
     try:
-        return whitelist_svc.auto_whitelist(payload.username, payload.discord_id)
+        return whitelist_svc.auto_whitelist(payload.username, payload.discord_id, payload.password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except PermissionError as e:

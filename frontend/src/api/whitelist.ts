@@ -1,6 +1,7 @@
 export interface WhitelistRequest {
   username: string
   discord_id: string
+  password?: string
 }
 
 export interface WhitelistResponse {
@@ -11,14 +12,12 @@ export interface WhitelistResponse {
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
-export async function requestWhitelist(username: string, discordId: string): Promise<WhitelistResponse> {
-  if (!API_BASE) {
-    throw new Error('VITE_API_BASE_URL is not set (check frontend .env and restart Vite)')
-  }
+export async function requestWhitelist(username: string, discordId: string, password?: string): Promise<WhitelistResponse> {
 
   const payload: WhitelistRequest = {
     username,
     discord_id: discordId,
+    password: password?.trim() || undefined,
   }
 
   const res = await fetch(`${API_BASE}/whitelist/request`, {

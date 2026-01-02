@@ -9,6 +9,8 @@ import './Whitelister.css'
 function Whitelister() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [passwordError, setPasswordError] = useState('')
   const [discordId, setDiscordId] = useState('')
   const [usernameError, setUsernameError] = useState('')
   const [discordIdError, setDiscordIdError] = useState('')
@@ -29,7 +31,23 @@ function Whitelister() {
     return true
   }
 
-    const validateDiscordId = (value: string): boolean => {
+  const validatePassword = (value: string): boolean => {
+    const v = value.trim()
+    if (!v) {
+      setPasswordError('Password is required')
+      return false
+    }
+    if (v.length < 3) {
+      setPasswordError('Password must be at least 3 characters')
+    }
+    if (v.length > 5) {
+        setPasswordError('Bitch, why you want such a long ass password, max is 5 characters')
+    }
+    setPasswordError('')
+    return true
+  }
+
+  const validateDiscordId = (value: string): boolean => {
     const v = value.trim()
     if (!v) {
       setDiscordIdError('Discord User ID is required')
@@ -50,6 +68,13 @@ function Whitelister() {
     if (usernameError) validateUsername(value)
   }
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const value = e.target.value
+    setPassword(value)
+    if (passwordError) validatePassword(value)
+  }
+
+
   const handleDiscordIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value
     setDiscordId(value)
@@ -63,12 +88,14 @@ function Whitelister() {
 
     const uOk = validateUsername(username)
     const dOk = validateDiscordId(discordId)
-    if (!uOk || !dOk) return
+    const pOk = validatePassword(password)
+
+    if (!uOk || !dOk || !pOk) return
 
     setIsLoading(true)
 
     try {
-      const response = await requestWhitelist(username.trim(), discordId.trim())
+      const response = await requestWhitelist(username.trim(), discordId.trim(), password.trim())
       setSuccessData({
         message: response.message,
         login_password: response.login_password,
@@ -76,6 +103,7 @@ function Whitelister() {
 
       // Reset form
       setUsername('')
+      setPassword('')
       setDiscordId('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred')
@@ -100,6 +128,16 @@ function Whitelister() {
             error={usernameError}
             required
             placeholder="Enter your desired username"
+          />
+          <Input
+            label="Password"
+            name="password"
+            type="password"
+            value={password}
+            onChange={handlePasswordChange}
+            error={passwordError}
+            required
+            placeholder="Choose a password (2+ chars)"
           />
           <Input
             label="Discord User ID"

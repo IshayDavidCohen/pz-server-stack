@@ -23,30 +23,6 @@ async def create_request(payload: WhitelistRequestIn):
         raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
 
 
-@router.get("/whitelist/requests")
-async def list_requests(status: str | None = None):
-    try:
-        return await worker.get("/whitelist/requests", params={"status": status} if status else None)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
-
-
-@router.post("/whitelist/requests/{request_id}/approve")
-async def approve(request_id: str):
-    try:
-        return await worker.post(f"/whitelist/requests/{request_id}/approve", json={})
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
-
-
-@router.post("/whitelist/requests/{request_id}/reject")
-async def reject(request_id: str):
-    try:
-        return await worker.post(f"/whitelist/requests/{request_id}/reject", json={})
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"WorkerClient error: {e}")
-
-
 @router.get("/status", response_model=StatusResponse)
 async def status():
     try:

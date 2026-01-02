@@ -5,6 +5,7 @@ from typing import Optional, List, Literal
 class WhitelistRequestIn(BaseModel):
     username: str = Field(min_length=2, max_length=32)
     discord_id: str = Field(min_length=15, max_length=20, pattern=r"^\d{15,20}$")
+    password: str | None = None
 
 
 class CreateRequestResponse(BaseModel):
