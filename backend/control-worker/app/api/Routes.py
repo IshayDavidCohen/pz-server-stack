@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException
-from typing import Optional, List
 
 from app.schemas import (
     WhitelistRequestIn,
@@ -8,14 +7,11 @@ from app.schemas import (
     StatusResponse
 )
 
-from app.core.Config import settings
-from app.repositories.WhitelistRepository import JsonWhitelistRepository
 from app.services.WhitelistService import WhitelistService
 from app.services.StatusService import StatusService
 
 router = APIRouter()
 
-repository = JsonWhitelistRepository(settings.DATA_DIR)
 whitelist_svc = WhitelistService()
 status_svc = StatusService()
 

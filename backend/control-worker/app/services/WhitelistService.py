@@ -38,9 +38,19 @@ class WhitelistService:
             password=settings.PZ_RCON_PASSWORD,
             timeout=3.0,
         )
-        c.connect()
+        try:
+            c.connect()
+        except Exception as e:
+            raise RuntimeError(
+                f"RCON connect failed to {settings.PZ_RCON_HOST}:{settings.PZ_RCON_PORT}: {repr(e)}"
+            )
 
-        auth_res = c.auth()
+        try:
+            auth_res = c.auth()
+        except Exception as e:
+            c.close()
+            raise RuntimeError(f"RCON auth call crashed: {repr(e)}")
+
         if not auth_res.ok:
             c.close()
             raise RuntimeError("RCON auth failed (check PZ_RCON_PASSWORD).")
@@ -54,19 +64,19 @@ class WhitelistService:
         last = None
         ok = False
         for cmd in cmd_variants:
-            last = c.exec(cmd)
+            try:
+                last = c.exec(cmd)
+            except Exception as e:
+                c.close()
+                raise RuntimeError(f"RCON exec crashed on cmd={cmd!r}: {repr(e)}")
+
             if last.ok:
-                ok = True
-                break
+                c.close()
+                return {
+                    "ok": True,
+                    "message": f"Whitelisted {username}",
+                    "login_password": login_password
+                }
 
         c.close()
-
-        if not ok:
-            raise RuntimeError(f"RCON adduser failed: {getattr(last, 'data', None)}")
-
-        return {
-            "ok": True,
-            "message": f"Whitelisted. Use username '{username}' with the password shown to log in.",
-            "request_id": None,
-            "login_password": login_password,
-        }
+        raise RuntimeError(f"RCON adduser failed, last={getattr(last, 'data', None)}")

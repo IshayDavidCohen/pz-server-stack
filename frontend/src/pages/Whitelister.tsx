@@ -9,8 +9,9 @@ import './Whitelister.css'
 function Whitelister() {
   const navigate = useNavigate()
   const [username, setUsername] = useState('')
-  const [note, setNote] = useState('')
+  const [discordId, setDiscordId] = useState('')
   const [usernameError, setUsernameError] = useState('')
+  const [discordIdError, setDiscordIdError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [successData, setSuccessData] = useState<{ request_id: string; message: string } | null>(null)
   const [error, setError] = useState('')
@@ -28,16 +29,31 @@ function Whitelister() {
     return true
   }
 
+    const validateDiscordId = (value: string): boolean => {
+    const v = value.trim()
+    if (!v) {
+      setDiscordIdError('Discord User ID is required')
+      return false
+    }
+    // Discord IDs are numbers of lengths commonly 17-20 digits
+    if (!/^\d{17,20}$/.test(v)) {
+      setDiscordIdError('Discord User ID must be 17–20 digits (numbers only)')
+      return false
+    }
+    setDiscordIdError('')
+    return true
+  }
+
   const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setUsername(value)
-    if (usernameError) {
-      validateUsername(value)
-    }
+    if (usernameError) validateUsername(value)
   }
 
-  const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setNote(e.target.value)
+  const handleDiscordIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setDiscordId(value)
+    if (discordIdError) validateDiscordId(value)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,21 +61,21 @@ function Whitelister() {
     setError('')
     setSuccessData(null)
 
-    if (!validateUsername(username)) {
-      return
-    }
+    const uOk = validateUsername(username)
+    const dOk = validateDiscordId(discordId)
+    if (!uOk || !dOk) return
 
     setIsLoading(true)
 
     try {
-      const response = await requestWhitelist(username.trim(), note.trim())
+      const response = await requestWhitelist(username.trim(), discordId.trim())
       setSuccessData({
         request_id: response.request_id,
         message: response.message,
       })
       // Reset form
       setUsername('')
-      setNote('')
+      setDiscordId('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred')
     } finally {
@@ -71,7 +87,7 @@ function Whitelister() {
     <div className="page-container">
       <Card>
         <h2 className="whitelister-subtitle">
-          Enter your desired username so the admin can whitelist you.
+          Enter your desired username + your Discord User ID so the admin can verify you.
         </h2>
         <form onSubmit={handleSubmit}>
           <Input
@@ -85,13 +101,14 @@ function Whitelister() {
             placeholder="Enter your desired username"
           />
           <Input
-            label="Note (Optional)"
-            name="note"
-            value={note}
-            onChange={handleNoteChange}
-            multiline
-            rows={4}
-            placeholder="e.g., I'm Alex from uni"
+            label="Discord User ID"
+            name="discordId"
+            type="text"
+            value={discordId}
+            onChange={handleDiscordIdChange}
+            error={discordIdError}
+            required
+            placeholder="e.g., 110635447562782116"
           />
           {error && (
             <div className="error-alert" role="alert" aria-live="polite">
@@ -100,7 +117,7 @@ function Whitelister() {
           )}
           {successData && (
             <div className="success-panel" role="alert" aria-live="polite">
-              <h3 className="success-title">Request sent</h3>
+              <h3 className="success-title">Whitelist Job sent</h3>
               <p className="success-message">{successData.message}</p>
               <p className="success-id">Request ID: {successData.request_id}</p>
             </div>
