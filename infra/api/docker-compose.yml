@@ -1,0 +1,20 @@
+services:
+  control-worker:
+    build: ../../backend/control-worker
+    container_name: control-worker
+    env_file: .env
+    volumes:
+      - ./worker-data:/data
+    expose:
+      - "8001"
+
+  control-api:
+    build: ../../backend/control-api
+    container_name: control-api
+    env_file: .env
+    depends_on:
+      - control-worker
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKER_BASE_URL=http://control-worker:8001
