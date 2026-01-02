@@ -2,20 +2,16 @@ import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card'
 import Button from '../components/Button'
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api"
+
 function Safehouse() {
   const navigate = useNavigate()
 
-  const SERVER_IP = "10.0.0.18";     // for LAN tests; for friends outside use your public IP/DDNS
-  const SERVER_PORT = 16261;
-  const SERVER_PASSWORD = "5533";
-
   const handleJoinSafehouse = async () => {
+    const res = await fetch(`${API_BASE}/server/info`)
+    if (!res.ok) throw new Error("Failed to fetch server info")
+    const data = await res.json()
 
-    // Launch game script - this would typically call a backend endpoint
-    // or use a protocol handler like steam:// or a custom script
-    // For now, we'll show an alert as a placeholder
-    const res = await fetch("http://<your-api-host>:8000/server/info");
-    const data = await res.json();
     alert('Launching Project Zomboid and joining server...')
     window.location.href = data.steam_url;
   }

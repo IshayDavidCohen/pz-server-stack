@@ -6,10 +6,10 @@ export interface WhitelistRequest {
 export interface WhitelistResponse {
   ok: boolean
   message: string
-  request_id: string | null
+  login_password: string | null
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
 export async function requestWhitelist(username: string, discordId: string): Promise<WhitelistResponse> {
   if (!API_BASE) {

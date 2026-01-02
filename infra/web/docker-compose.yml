@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build: ../../frontend
+    container_name: frontend
+    ports:
+      - "5173:80"
+    networks:
+      - pznet
+
+networks:
+  pznet:
+    external: true
+    name: pznet

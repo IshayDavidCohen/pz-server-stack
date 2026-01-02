@@ -13,7 +13,7 @@ function Whitelister() {
   const [usernameError, setUsernameError] = useState('')
   const [discordIdError, setDiscordIdError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [successData, setSuccessData] = useState<{ request_id: string; message: string } | null>(null)
+  const [successData, setSuccessData] = useState<{ message: string; login_password: string | null } | null>(null)
   const [error, setError] = useState('')
 
   const validateUsername = (value: string): boolean => {
@@ -44,13 +44,13 @@ function Whitelister() {
     return true
   }
 
-  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value
     setUsername(value)
     if (usernameError) validateUsername(value)
   }
 
-  const handleDiscordIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDiscordIdChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const value = e.target.value
     setDiscordId(value)
     if (discordIdError) validateDiscordId(value)
@@ -70,9 +70,10 @@ function Whitelister() {
     try {
       const response = await requestWhitelist(username.trim(), discordId.trim())
       setSuccessData({
-        request_id: response.request_id,
         message: response.message,
+        login_password: response.login_password,
       })
+
       // Reset form
       setUsername('')
       setDiscordId('')
@@ -115,13 +116,15 @@ function Whitelister() {
               {error}
             </div>
           )}
-          {successData && (
-            <div className="success-panel" role="alert" aria-live="polite">
-              <h3 className="success-title">Whitelist Job sent</h3>
-              <p className="success-message">{successData.message}</p>
-              <p className="success-id">Request ID: {successData.request_id}</p>
-            </div>
-          )}
+            {successData && (
+              <div className="success-panel" role="alert" aria-live="polite">
+                <h3 className="success-title">Whitelisted</h3>
+                <p className="success-message">{successData.message}</p>
+                {successData.login_password && (
+                  <p className="success-id">Login Password: {successData.login_password}</p>
+                )}
+              </div>
+            )}
           <div className="form-actions">
             <Button type="submit" variant="primary" loading={isLoading} disabled={isLoading}>
               Request Whitelist
