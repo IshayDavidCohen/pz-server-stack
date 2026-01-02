@@ -5,7 +5,7 @@ services:
     env_file: .env
     volumes:
       - ./worker-data:/data
-    ports:
+    expose:
       - "8001"
 
   control-api:
